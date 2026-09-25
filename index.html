@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>ぱれぷちふぁくとりー。</title>
+    <style>
+        /* PASSWORD SCREEN */
+        .password-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #F8C9D8, #F4B6C8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .password-screen.hidden {
+            display: none;
+        }
+
+        .password-box {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 24px;
+            text-align: center;
+            max-width: 280px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .password-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #5a5a5a;
+            margin-bottom: 12px;
+        }
+
+        .password-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #f0e0d0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #FFF9F5;
+            font-family: inherit;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #F8C9D8;
+            background: white;
+        }
+
+        .password-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #F8C9D8, #F4B6C8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .password-btn:active {
+            transform: scale(0.95);
+        }
+
+        .password-error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        :root {
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            --primary: #FFF9F5;
+            --secondary: #F8C9D8;
+            --accent1: #F4B6C8;
+            --accent2: #D9F0FF;
+            --accent3: #DDF5E5;
+            --accent4: #E9DDF8;
+            --text: #5a5a5a;
+            --border: #f0e0d0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: var(--primary);
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: var(--primary);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--primary);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+        }
+
+        nav button {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 16px;
+            background: var(--accent2);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        nav button.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        nav button:active {
+            transform: scale(0.95);
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            overflow-y: auto;
+            scroll-padding-top: 60px;
+        }
+
+        main {
+            padding: 16px;
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* HOME */
+        .hero {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .hero p {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .tagline {
+            background: linear-gradient(135deg, var(--secondary), var(--accent1));
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .step {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .step-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .step p {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 24px 0 12px 0;
+            color: var(--text);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .category-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .category-card:active {
+            transform: scale(0.95);
+            background: var(--accent2);
+        }
+
+        .category-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* PROMPTS */
+        .prompt-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .prompt-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .prompt-category {
+            display: inline-block;
+            background: var(--accent2);
+            color: var(--text);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .prompt-description {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--primary);
+            border-radius: 8px;
+        }
+
+        .section-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+
+        .prompt-text {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary), var(--accent1));
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-secondary {
+            background: var(--accent2);
+            color: var(--text);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.95);
+        }
+
+        /* MAKER */
+        .step-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option-button {
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            color: var(--text);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .option-button:active {
+            transform: scale(0.98);
+        }
+
+        .option-button.selected {
+            border-color: var(--secondary);
+            background: var(--secondary);
+            color: white;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--primary);
+            font-family: inherit;
+            resize: none;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, var(--secondary), var(--accent1));
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .result-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .result-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .result-text {
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .copy-btn {
+            background: white;
+            color: var(--secondary);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent1));
+            transition: width 0.3s ease;
+        }
+
+        /* PHRASES */
+        .phrase-section {
+            margin-bottom: 20px;
+        }
+
+        .phrase-category {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .phrase-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .phrase-text {
+            font-size: 13px;
+            color: #666;
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .copy-icon {
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+            padding: 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            background: var(--accent2);
+            color: var(--text);
+        }
+
+        .copy-icon:active {
+            transform: scale(0.9);
+        }
+
+        /* SIZES */
+        .size-card {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .size-purpose {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .size-info {
+            font-size: 12px;
+            color: #888;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .info-item {
+            padding: 6px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 16px;
+            color: #999;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .size-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- PASSWORD SCREEN -->
+    <div class="password-screen" id="passwordScreen">
+        <div class="password-box">
+            <div class="password-title">🔐 ぱれぷちふぁくとりー。</div>
+            <div class="password-subtitle">購入者限定ツール<br/>合言葉を入力してください</div>
+            <input type="password" class="password-input" id="passwordInput" placeholder="合言葉を入力" onkeypress="if(event.key==='Enter') checkPassword();">
+            <button class="password-btn" onclick="checkPassword()">解除する</button>
+            <div class="password-error" id="passwordError">✕ 合言葉が違います</div>
+        </div>
+    </div>
+
+    <div class="app" id="mainApp" style="display:none;">
+        <header>
+            <div class="logo">✨ぱれぷちふぁくとりー。</div>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 プロンプトを検索...">
+            </div>
+            <nav id="navMenu"></nav>
+        </header>
+
+        <div class="container">
+            <main id="mainContent"></main>
+        </div>
+    </div>
+
+    <script>
+        // ===== PASSWORD ===== 
+        // 🔑 合言葉を変更する場合はここを編集
+        const PASSWORD = "pplabo";
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('passwordError');
+            
+            if (input === PASSWORD) {
+                // 正解
+                document.getElementById('passwordScreen').classList.add('hidden');
+                document.getElementById('mainApp').style.display = 'flex';
+                errorMsg.classList.remove('show');
+            } else {
+                // 不正解
+                errorMsg.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        // 初期化時にフォーカス
+        window.addEventListener('load', () => {
+            document.getElementById('passwordInput').focus();
+        });
+
+        // ===== DATA =====
+        const promptsData = [
+            {id: 1, category: "人物・ライフスタイル", title: "韓国カフェで過ごす女性", prompt: "30代の女性が、明るくおしゃれな韓国ナチュラルテイストのカフェでゆったり過ごしている。淡いアイボリーのトップス、自然なミディアムヘア、清潔感のあるナチュラルな雰囲気。テーブルにはカフェラテと小さなノート。アイボリー、ベージュ、淡いブラウンを基調にしたインテリア。窓から柔らかな自然光が入り、写真全体は明るく柔らかい。大人かわいい、韓国ガーリー、ナチュラル、上品、生活感は控えめ。InstagramやCanvaで使いやすい縦長4:5構図。", arrange: "服の色、髪型、カフェの雰囲気、飲み物、季節、余白の位置を変更できます。", fix: "人物の表情や手指が不自然な場合は「自然な手の形、リアルな指、自然なポーズ」と追加。", canvaUse: "Instagram投稿、noteのアイキャッチ、ブログ記事のメイン画像"},
+            {id: 2, category: "人物・ライフスタイル", title: "ノートPCで作業する女性", prompt: "30代の女性が、明るくおしゃれなナチュラルカフェでノートパソコンを使って作業している。淡いアイボリーのトップス。テーブルの上にはノートパソコン、ノート、ペン、カフェラテ。韓国ナチュラルなカフェインテリア、アイボリー、ベージュ、淡いブラウンを基調とした落ち着いた空間。柔らかな自然光、清潔感、上品で大人かわいい雰囲気。画面には読める文字を表示しない。縦長4:5、Canvaで文字を載せやすい余白を残す。", arrange: "トップス、PCの色、カフェ、飲み物、余白の位置、季節を変更できます。", fix: "PC画面に文字が出てしまう場合は「画面には文字やロゴを入れない」と追加。", canvaUse: "Instagramの仕事・AI・Canva投稿、noteのアイキャッチ"},
+            {id: 3, category: "人物・ライフスタイル", title: "スマホを持つ女性の手元", prompt: "30代女性がスマートフォンを持っている手元の写真。顔は写さず、手元とテーブルまわりを中心にした自然なライフスタイル写真。淡いアイボリーの袖、ナチュラルなネイル。テーブルにはカフェラテ、小さなノート、ペン。韓国ナチュラル、淡色、清潔感、柔らかな自然光、落ち着いた大人かわいい雰囲気。スマートフォン画面には文字やロゴを入れない。縦長4:5、文字を載せられる余白を確保。", arrange: "ネイル、袖の色、飲み物、テーブル素材、背景、余白位置を変更できます。", fix: "手指が不自然な場合は「片手で自然にスマートフォンを持つ、指を正確に描写」と追加。", canvaUse: "Instagram投稿、スマホ関連投稿、Canvaテンプレート素材"},
+            {id: 4, category: "人物・ライフスタイル", title: "おしゃれなデスクで仕事をする女性", prompt: "30代女性が明るく整ったナチュラルなデスクで仕事をしている。アイボリーのトップス、自然なヘアスタイル。デスクにはノートパソコン、ノート、ペン、カフェラテ、季節の小さな花。韓国ナチュラル、淡色、ミニマル、大人かわいい、清潔感のある空間。柔らかな窓からの自然光。人物を主張しすぎず、デザイン素材として使いやすい余白を左右どちらかに広く確保。縦長4:5。", arrange: "机の色、花、服、仕事道具、人物の位置、余白位置を変更できます。", fix: "ごちゃつく場合は「小物は必要最小限、整理されたデスク」と追加。", canvaUse: "仕事・副業・AI・Canva関連のInstagram投稿"},
+            {id: 5, category: "人物・ライフスタイル", title: "カフェで友達と過ごす女性", prompt: "30代女性2人が、おしゃれな韓国ナチュラルカフェで楽しそうに会話している。淡いベージュ、アイボリー、くすみピンクの服。テーブルにはカフェラテと焼き菓子。自然な笑顔、リラックスしたポーズ、親しみやすい雰囲気。明るい自然光、淡色インテリア、韓国ガーリー、ナチュラル、大人かわいい。人物の顔や手は自然で、過度な加工感はない。縦長4:5、周囲に適度な余白。", arrange: "人数、服の色、カフェ、飲み物、季節、人物の位置を変更できます。", fix: "人物が増えすぎる場合は「女性2人のみ」と明記。", canvaUse: "女性向けSNS、コミュニティ、イベント告知、ブログ"},
+            {id: 6, category: "カフェ・食べ物", title: "韓国カフェのテーブル風景", prompt: "韓国ナチュラルカフェのテーブルを上から少し斜めに見た、おしゃれなライフスタイル写真。木製または淡いベージュのテーブルの上に、カフェラテ、焼き菓子、小さな花、ノート、ペンを自然に配置。アイボリー、ベージュ、淡いブラウン、くすみピンク。柔らかな自然光、淡色、清潔感、韓国カフェ、大人かわいい、余白のある構図。文字やロゴは入れない。縦長4:5。", arrange: "飲み物、焼き菓子、花、テーブル、色、構図を変更できます。", fix: "物が多すぎる場合は「小物は3〜5点、余白を十分に残す」と追加。", canvaUse: "Instagram背景、noteアイキャッチ、Canva素材"},
+            {id: 7, category: "カフェ・食べ物", title: "ラテアートと焼き菓子", prompt: "淡いベージュのテーブルに置かれた美しいラテアートと、シンプルな焼き菓子の写真。カフェラテには繊細で可愛らしいラテアート。小さな花とナプキンを添える。韓国ナチュラルカフェ、アイボリー、ベージュ、ミルクブラウン、柔らかな自然光、淡色、大人かわいい、上品。食べ物はリアルで美味しそう。文字やロゴなし。縦長4:5、余白多め。", arrange: "ラテアート、焼き菓子、花、食器、背景色を変更できます。", fix: "ラテアートが崩れる場合は「シンプルで左右対称のラテアート」と追加。", canvaUse: "カフェ投稿、レシピ紹介、Instagram背景"},
+            {id: 8, category: "カフェ・食べ物", title: "淡色カフェのスイーツ", prompt: "淡色カフェで提供される可愛らしいスイーツのテーブルフォト。小さなケーキまたは焼き菓子をアイボリーのプレートに盛り付け、淡いピンクの花を添える。韓国ガーリー、ナチュラル、上品、大人かわいい、アイボリー、ベージュ、淡いピンク。柔らかな自然光、浅い被写界深度、リアルで美味しそうな質感。文字やロゴなし。縦長4:5。", arrange: "スイーツの種類、花、皿、背景、色、季節を変更できます。", fix: "食べ物が不自然な場合は「実物写真のような自然な質感、整った盛り付け」と追加。", canvaUse: "スイーツ投稿、カフェ紹介、商品紹介"},
+            {id: 9, category: "カフェ・食べ物", title: "おしゃれな朝食テーブル", prompt: "明るい朝のナチュラルなダイニングテーブルに並ぶおしゃれな朝食。トースト、フルーツ、ヨーグルト、コーヒー、ナプキン、小さな花をバランスよく配置。アイボリー、ベージュ、淡いグリーンを基調にした韓国ナチュラルな雰囲気。朝の柔らかな自然光、清潔感、健康的、温かい、大人かわいい。生活感は控えめで整った写真。文字やロゴなし。縦長4:5。", arrange: "朝食メニュー、食器、花、テーブル、季節、色を変更できます。", fix: "料理が多すぎる場合は「料理は4品以内、余白を残す」と追加。", canvaUse: "朝活、料理、暮らし、ママ向けSNS"},
+            {id: 10, category: "カフェ・食べ物", title: "コーヒー・ノート・スマホの組み合わせ", prompt: "淡いベージュのテーブルに、カフェラテ、小さなノート、ペン、スマートフォンを自然に配置したライフスタイル写真。スマートフォン画面には文字やロゴを表示しない。韓国ナチュラル、淡色、ミニマル、大人かわいい、清潔感。柔らかな自然光、アイボリー、ベージュ、ミルクブラウン。SNS投稿に文字を載せやすい広い余白を確保。縦長4:5。", arrange: "飲み物、ノート、花、小物、背景、余白位置を変更できます。", fix: "画面の文字が気になる場合は「スマートフォン画面は無地」と追加。", canvaUse: "Canva投稿背景、仕事・AI・手帳関連SNS"},
+            {id: 11, category: "背景・小物", title: "淡色のおしゃれなデスク", prompt: "アイボリーと淡いベージュを基調にした、おしゃれで整ったデスクの写真。ノートパソコン、ノート、ペン、カフェラテ、小さな花瓶を自然に配置。韓国ナチュラル、淡色、ミニマル、大人かわいい、清潔感。柔らかな自然光、木と布の自然な素材感。人物なし。文字やロゴなし。中央または左右に十分な余白を確保。縦長4:5。", arrange: "小物、花、机の素材、色、余白位置を変更できます。", fix: "ごちゃつく場合は「小物を少なく、整然と配置」と追加。", canvaUse: "Canva背景、Instagram投稿、noteアイキャッチ"},
+            {id: 12, category: "背景・小物", title: "韓国ナチュラルな部屋", prompt: "韓国ナチュラルテイストのおしゃれな部屋。アイボリーの壁、淡い木目の家具、ベージュのソファ、観葉植物、小さな花や雑貨を配置。余白を大切にしたシンプルで整ったインテリア。柔らかな自然光、淡色、温かい、清潔感、韓国ナチュラル、大人かわいい。人物なし、文字やロゴなし。縦長4:5、中央に広い空間を残す。", arrange: "家具、植物、雑貨、壁色、時間帯、余白位置を変更できます。", fix: "生活感が強い場合は「生活用品を最小限にしてモデルルームのように整える」と追加。", canvaUse: "暮らし系Instagram、ブログ、Canva背景"},
+            {id: 13, category: "背景・小物", title: "花と小物のフラットレイ", prompt: "淡いアイボリーの背景に、季節の花、リボン、ノート、ペン、小さなアクセサリーなどを美しく配置したフラットレイ。韓国ガーリー、淡色、ナチュラル、大人かわいい、上品。アイボリー、淡いピンク、ベージュ、セージグリーン。柔らかな自然光、余白をたっぷり確保し、文字を載せやすい構図。文字やロゴなし。縦長4:5。", arrange: "花、リボン、小物、色、季節、配置を変更できます。", fix: "散らかった印象になる場合は「小物を少なく、均等な余白を保つ」と追加。", canvaUse: "Instagram背景、Canvaテンプレート、ショップ告知"},
+            {id: 14, category: "背景・小物", title: "淡い色の紙・布・リボン背景", prompt: "アイボリー、淡いピンク、ベージュの紙、布、細いリボンを組み合わせたミニマルな背景素材。柔らかな自然光と繊細な影、紙や布の自然な質感。韓国ガーリー、淡色、ナチュラル、上品、大人かわいい。人物なし、文字なし、ロゴなし。中央または片側に大きな余白を残し、Canvaで文字を重ねやすい構図。縦長4:5。", arrange: "色、紙質、布、リボン、配置、影の強さを変更できます。", fix: "背景が平坦な場合は「紙と布の繊細な質感、自然な立体感」と追加。", canvaUse: "文字入りSNS投稿、商品紹介、告知画像"},
+            {id: 15, category: "背景・小物", title: "季節の花を使った余白多め背景", prompt: "季節の花を主役にした、淡色で上品な背景素材。アイボリーの背景に季節の花を片側へ寄せて配置し、反対側には大きく何もない余白を残す。韓国ナチュラル、淡色、清潔感、大人かわいい、柔らかな自然光。花の色と季節感は自然に表現。人物なし、文字やロゴなし。InstagramやCanvaで文字を載せやすい縦長4:5。", arrange: "季節、花の種類、花の色、配置する左右、背景色を変更できます。", fix: "花が多すぎる場合は「花は片側に少量だけ配置」と追加。", canvaUse: "季節のお知らせ、Instagram、イベント告知"},
+            {id: 16, category: "Instagram・Canva", title: "Instagram投稿用の余白たっぷり背景", prompt: "Instagram投稿に使いやすい、淡色でおしゃれな縦長背景。アイボリーをベースに、淡いピンク、ベージュ、セージグリーンの小さな花やリボンを控えめに配置。中央には大きく文字を入れられる広い無地の余白。韓国ナチュラル、韓国ガーリー、上品、大人かわいい、清潔感。文字やロゴは生成しない。4:5の縦長構図。", arrange: "色、モチーフ、余白位置、季節感を変更できます。", fix: "文字を載せる場所が狭い場合は「中央70%をほぼ無地の余白にする」と追加。", canvaUse: "Instagramフィード投稿、Canvaテンプレート"},
+            {id: 17, category: "Instagram・Canva", title: "リール表紙に使えるおしゃれ背景", prompt: "InstagramリールまたはTikTok用の表紙に使いやすい、縦長で視認性の高い淡色背景。アイボリーをベースに淡いピンクとベージュのアクセントを配置。中央または上部に大きな文字を載せられる余白を確保。韓国ナチュラル、シンプル、大人かわいい、清潔感、柔らかな光。文字やロゴは生成しない。縦長9:16、スマートフォン画面で見やすい構図。", arrange: "色、モチーフ、文字用余白の位置、雰囲気を変更できます。", fix: "情報が散る場合は「中央の主役を1つだけ、背景はシンプル」と追加。", canvaUse: "Instagramリール表紙、ショート動画カバー"},
+            {id: 18, category: "Instagram・Canva", title: "商品紹介用のシンプルな背景", prompt: "商品を目立たせるための、シンプルで上品な商品撮影風背景。アイボリーまたは淡いベージュの背景に、自然な布や小さな花を控えめに配置。中央に商品を置くための広いスペースを確保。韓国ナチュラル、淡色、ミニマル、清潔感、柔らかな自然光。商品そのものは生成せず、背景素材として使用できる構図。文字やロゴなし。縦長4:5。", arrange: "背景色、花、布、影、商品を置く位置を変更できます。", fix: "商品を勝手に生成する場合は「商品なし、背景のみ」と追加。", canvaUse: "ハンドメイド、デジタル商品、コスメなどの商品紹介"},
+            {id: 19, category: "Instagram・Canva", title: "「お知らせ」に使えるかわいい背景", prompt: "InstagramやショップのSNS告知に使いやすい、明るくやさしい淡色背景。アイボリーをベースに淡いピンク、ベージュ、セージグリーンの花やリボンを端に控えめに配置。中央には大きな文字を載せられる無地の余白。韓国ガーリー、ナチュラル、大人かわいい、上品、清潔感。文字そのものは生成しない。縦長4:5。", arrange: "花、リボン、色、配置、季節感を変更できます。", fix: "文字を入れるスペースが不足する場合は「中央80%をシンプルな余白にする」と追加。", canvaUse: "営業案内、休業案内、新商品のお知らせ"},
+            {id: 20, category: "Instagram・Canva", title: "名言・短文を載せるための背景", prompt: "短い文章や名言を読みやすく配置できる、シンプルで上品な淡色背景。アイボリーの広い無地スペースを中心に、端へ淡いピンクの花や細いリボンを少量配置。韓国ナチュラル、ミニマル、やわらかい、上品、大人かわいい。文字やロゴは生成しない。文章を載せる場所を最優先し、背景の装飾は控えめ。縦長4:5。", arrange: "背景色、花、装飾、余白位置を変更できます。", fix: "装飾が強い場合は「文字の可読性を最優先、装飾は端のみ」と追加。", canvaUse: "名言投稿、自己紹介、学び系Instagram"},
+            {id: 21, category: "季節・イベント", title: "春・桜", prompt: "春のやわらかな空気感を表現した、淡色の桜背景。淡いピンクの桜の枝を片側に配置し、アイボリーと淡いベージュの明るい背景。柔らかな春の日差し、韓国ナチュラル、上品、大人かわいい、清潔感。桜を主役にしすぎず、文字を載せられる広い余白を確保。文字やロゴなし。縦長4:5。", arrange: "桜の量、背景、花瓶、色、余白位置を変更できます。", fix: "桜が密集する場合は「枝は少量、余白を広く」と追加。", canvaUse: "春のInstagram、入学・新生活のお知らせ"},
+            {id: 22, category: "季節・イベント", title: "夏・ひまわり", prompt: "夏らしい明るく爽やかなひまわりの背景。淡いアイボリーまたはクリーム色の背景に、ひまわりを片側へ自然に配置。淡いブルーやセージグリーンをアクセントに使う。明るい自然光、ナチュラル、爽やか、大人かわいい、上品。文字を載せるための広い余白を確保。文字やロゴなし。縦長4:5。", arrange: "ひまわりの本数、背景色、アクセント色、余白位置を変更できます。", fix: "夏感が強すぎる場合は「色味を淡く落ち着かせる」と追加。", canvaUse: "夏の告知、旅行、イベント、Instagram"},
+            {id: 23, category: "季節・イベント", title: "秋・ハロウィン", prompt: "大人かわいい淡色ハロウィンの背景。アイボリー、ベージュ、くすみオレンジ、淡いブラウンを基調に、小さなかぼちゃ、秋の葉、リボンを控えめに配置。怖すぎず、子どもっぽすぎない韓国ナチュラルな雰囲気。柔らかな自然光、上品、温かい、大人かわいい。文字を載せる広い余白。文字やロゴなし。縦長4:5。", arrange: "かぼちゃ、葉、色、リボン、背景、装飾量を変更できます。", fix: "怖い印象になった場合は「ホラー要素なし、明るく可愛らしい雰囲気」と追加。", canvaUse: "ハロウィン告知、イベント投稿、ショップSNS"},
+            {id: 24, category: "季節・イベント", title: "冬・クリスマス", prompt: "淡色で大人かわいいクリスマスの背景。アイボリー、ベージュ、淡いグリーン、くすみレッドを基調に、リース、松ぼっくり、小さなリボン、控えめなオーナメントを配置。雪のような柔らかな光、温かく上品な韓国ナチュラルテイスト。中央または片側に文字を載せられる広い余白。文字やロゴなし。縦長4:5。", arrange: "クリスマス小物、色、リース、雪、余白位置を変更できます。", fix: "装飾過多の場合は「小物を少なく、余白を広く」と追加。", canvaUse: "クリスマス告知、ショップ、プレゼント企画"},
+            {id: 25, category: "季節・イベント", title: "誕生日・記念日", prompt: "大人かわいい誕生日・記念日の淡色背景。アイボリーと淡いピンクをベースに、小さな花、リボン、キャンドル、上品なギフトボックスを配置。韓国ガーリー、ナチュラル、上品、柔らかな自然光、清潔感。中央に「HAPPY BIRTHDAY」などの文字を入れられる広い余白を確保するが、文字自体は生成しない。縦長4:5。", arrange: "花、リボン、ギフト、色、記念日の雰囲気を変更できます。", fix: "文字が生成される場合は「画像内に文字を生成しない」と追加。", canvaUse: "誕生日投稿、記念日、イベント告知"},
+            {id: 26, category: "商品・ショップ", title: "ハンドメイド商品の撮影風画像", prompt: "ハンドメイドアクセサリーや小物を紹介するための、韓国ナチュラルな商品撮影風シーン。アイボリーの布、淡いベージュの台、季節の小花を背景に配置。商品が主役になるよう中央に十分なスペースを確保し、柔らかな自然光と自然な影を表現。淡色、上品、清潔感、大人かわいい。ブランド名や文字、ロゴは入れない。縦長4:5。", arrange: "商品ジャンル、背景色、花、布、季節、商品の位置を変更できます。", fix: "商品形状が崩れる場合は「商品そのものを正確に保ち、背景だけを生成」と追加。", canvaUse: "ハンドメイドショップ、BASE、Instagram商品紹介"},
+            {id: 27, category: "商品・ショップ", title: "コスメ・美容商品の撮影風画像", prompt: "コスメや美容商品のための、清潔感のある淡色商品撮影シーン。アイボリー、ベージュ、淡いピンクを基調に、自然な布や小さな花、透明感のある小物を控えめに配置。商品を中央に置ける広いスペース、柔らかな自然光、上品、韓国ナチュラル、ミニマル、大人かわいい。ブランドロゴや文字は生成しない。縦長4:5。", arrange: "コスメの種類、背景色、花、布、光の強さ、商品位置を変更できます。", fix: "ロゴが勝手に入る場合は「ブランドロゴ・文字・記号を一切生成しない」と追加。", canvaUse: "コスメ紹介、美容SNS、商品バナー"},
+            {id: 28, category: "商品・ショップ", title: "デジタル商品の紹介画像", prompt: "Canvaテンプレート、PDF、note、デジタル素材などを紹介するための、おしゃれなデジタル商品撮影風シーン。ノートパソコンまたはタブレット、スマートフォン、ノート、ペン、カフェラテを淡色のデスクに配置。アイボリー、ベージュ、淡いピンク、セージグリーン。韓国ナチュラル、清潔感、上品、大人かわいい。画面には文字やロゴを入れず、商品情報をCanvaで後から追加できる余白を確保。縦長4:5。", arrange: "デバイス、机、小物、色、商品を置く位置、余白を変更できます。", fix: "画面に意味不明な文字が出る場合は「画面は無地の淡い色」と追加。", canvaUse: "note販売、デジタル商品、Canvaテンプレート紹介"},
+            {id: 29, category: "商品・ショップ", title: "カフェ・ショップのメニュー風画像", prompt: "韓国ナチュラルなカフェや小さなショップのメニュー紹介に使える、おしゃれなテーブルシーン。淡い木目のテーブルにカフェラテ、スイーツ、小さな花、無地のメニューボードを配置。アイボリー、ベージュ、淡いブラウン、セージグリーン。柔らかな自然光、清潔感、上品、大人かわいい。メニューボードには文字を入れず、後からCanvaで文字を追加できる広い余白を確保。縦長4:5。", arrange: "飲み物、スイーツ、花、メニューボード、背景色を変更できます。", fix: "文字が勝手に入る場合は「メニューボードは完全に無地」と追加。", canvaUse: "カフェメニュー、ショップ告知、Instagram投稿"},
+            {id: 30, category: "商品・ショップ", title: "オンラインショップの商品バナー", prompt: "オンラインショップの商品紹介に使いやすい、淡色で洗練された商品バナー背景。アイボリーをベースに、淡いピンク、ベージュ、セージグリーンの小さな装飾を端に配置。中央または片側に商品画像と商品名を後から配置できる大きな余白。韓国ナチュラル、ミニマル、上品、大人かわいい、清潔感。文字やロゴは生成しない。縦長4:5または用途に合わせて変更可能な構図。", arrange: "商品ジャンル、色、装飾、余白位置、ショップの雰囲気を変更できます。", fix: "情報量が多い場合は「装飾を最小限にし、商品と文字のための余白を最優先」と追加。", canvaUse: "BASE等のオンラインショップ、商品告知、SNS販売ページ"}
+        ];
+
+        const fixPhrases = {
+            "人物を変えたい": ["年代を20代、30代、40代に変える", "男性、女性、複数人で変える", "顔立ちを日本人的、韓国人的に変える"],
+            "髪型を変えたい": ["短髪、ロング、ボブに変える", "パーマ、ストレートで調整する", "髪色をブラウン、ブロンド、黒に変える"],
+            "服装を変えたい": ["トップス、スカート、パンツなど個別に指定", "色を淡いピンク、ベージュ、白に変える", "素材を綿、麻、シフォンなどで変える"],
+            "色を変えたい": ["メインカラーをアイボリー→ベージュに変える", "背景色を淡いピンク、セージグリーンに変える", "全体をモノトーン、カラフルで変える"],
+            "背景を変えたい": ["カフェ、自宅、屋外に変える", "白背景、淡色背景、グラデーション背景に変える", "季節を春、夏、秋、冬に変える"],
+            "小物を追加したい": ["花を追加「小さな花を加える」", "雑貨を追加「手帳、ペンを追加」", "食べ物を追加「ケーキ、フルーツを追加」"],
+            "小物を削除したい": ["「背景をシンプルに、小物は削除」", "「必要最小限の小物だけ残す」", "「余白をより多く確保」"],
+            "余白を増やしたい": ["「画面の50%以上を無地にする」", "「中央に大きな空白を作る」", "「両サイドに余白を確保」"],
+            "構図を変えたい": ["「正面から、斜めから、上から見た構図に変える」", "「手元中心、全身で変える」", "「左右の配置を入れ替える」"],
+            "もっと淡色にしたい": ["「全体的に色を薄く、パステル調にする」", "「彩度を下げて落ち着かせる」", "「白との混合を多くする」"],
+            "もっと韓国っぽくしたい": ["「韓国ナチュラルテイストを強調」", "「淡い色合い、ミニマルなデザイン」", "「K-beauty的な清潔感を強調」"],
+            "文字を入れるスペースを作りたい": ["「中央70%を無地の余白にする」", "「右側に大きな空白を作る」", "「上部または下部に文字スペースを確保」"]
+        };
+
+        const canvaSizes = [
+            { purpose: "Instagram投稿", size: "1080×1350px", ratio: "縦4:5", use: "通常のフィード投稿に最適" },
+            { purpose: "Instagramストーリーズ", size: "1080×1920px", ratio: "縦9:16", use: "24時間で消える投稿" },
+            { purpose: "Instagramリール", size: "1080×1920px", ratio: "縦9:16", use: "動画・スライドショーに" },
+            { purpose: "noteヘッダー", size: "1400×1000px", ratio: "横14:10", use: "記事のアイキャッチ画像" },
+            { purpose: "YouTube", size: "1280×720px", ratio: "横16:9", use: "サムネイル画像用" },
+            { purpose: "LINE OA", size: "1200×400px", ratio: "横3:1", use: "クーポン・告知バナー" },
+            { purpose: "ブログアイキャッチ", size: "1200×630px", ratio: "横1.9:1", use: "WordPressなど" },
+            { purpose: "ECショップバナー", size: "1000×400px", ratio: "横2.5:1", use: "楽天・BASEなど" }
+        ];
+
+        // ===== STATE =====
+        let currentPage = 'home';
+        let searchQuery = '';
+        let selectedCategory = null;
+        let makerStep = 1;
+        let makerData = { type: null, role: [], place: [], mood: [], color: [], composition: [], use: [], extra: '' };
+        let showMakerResult = false;
+
+        // ===== RENDER FUNCTIONS =====
+        function renderNav() {
+            const navMenu = document.getElementById('navMenu');
+            const pages = [
+                { id: 'home', label: '🏠 HOME' },
+                { id: 'prompts', label: '🤖 コピペプロンプト' },
+                { id: 'maker', label: '✏️ 自作メーカー' },
+                { id: 'phrases', label: '🛠️ 修正フレーズ' },
+                { id: 'sizes', label: '📐 Canvaサイズ' }
+            ];
+
+            navMenu.innerHTML = pages.map(page => 
+                `<button class="${currentPage === page.id ? 'active' : ''}" onclick="setPage('${page.id}')">${page.label}</button>`
+            ).join('');
+        }
+
+        function renderContent() {
+            const mainContent = document.getElementById('mainContent');
+            let html = '';
+
+            if (currentPage === 'home') {
+                html = renderHome();
+            } else if (currentPage === 'prompts') {
+                html = renderPrompts();
+            } else if (currentPage === 'maker') {
+                html = renderMaker();
+            } else if (currentPage === 'phrases') {
+                html = renderPhrases();
+            } else if (currentPage === 'sizes') {
+                html = renderSizes();
+            }
+
+            mainContent.innerHTML = html;
+        }
+
+        function renderHome() {
+            const latestPrompts = promptsData.slice(-3).reverse();
+            const categoryInfo = {
+                "人物・ライフスタイル": "👩",
+                "カフェ・食べ物": "☕",
+                "背景・小物": "🪴",
+                "Instagram・Canva": "📱",
+                "季節・イベント": "🌷",
+                "商品・ショップ": "🛍️"
+            };
+
+            return `
+                <div class="hero">
+                    <h1>✨ぱれぷちふぁくとりー。</h1>
+                    <div class="tagline">コピペして、ちょっと変える。<br/>AI画像づくりをもっと気軽に。</div>
+                    <p style="margin-top: 16px; font-size: 13px; color: #999;">
+                        AI初心者が、ポチポチ選ぶだけで<br/>自分に合ったAI画像生成プロンプトを作れる場所
+                    </p>
+                </div>
+
+                <div class="section-title">📚 3つのSTEP</div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <p>プロンプトを<br/>ポチポチ選ぶ</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <p>自分だけの<br/>プロンプト完成</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <p>AIで<br/>画像を作る</p>
+                    </div>
+                </div>
+
+                <div class="section-title">🔥 人気カテゴリー</div>
+                <div class="grid-2">
+                    ${Object.entries(categoryInfo).map(([cat, icon]) => `
+                        <div class="category-card" onclick="setCategory('${cat}'); setPage('prompts');">
+                            <div class="category-icon">${icon}</div>
+                            <div class="category-name">${cat}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="section-title">✨ 新着プロンプト</div>
+                ${latestPrompts.map(p => `
+                    <div class="prompt-card">
+                        <div class="prompt-title">${p.title}</div>
+                        <div class="prompt-category">${p.category}</div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="copyText('${p.prompt.replace(/'/g, "\\'")}')">📋 コピー</button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function renderPrompts() {
+            const filtered = promptsData.filter(p => {
+                const matchesSearch = !searchQuery || p.title.includes(searchQuery) || p.category.includes(searchQuery);
+                const matchesCategory = !selectedCategory || p.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (filtered.length === 0) {
+                return `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <div class="no-results-text">見つかりませんでした</div>
+                    </div>
+                `;
+            }
+
+            return `
+                ${selectedCategory ? `<button onclick="setCategory(null)" style="background:white;border:1px solid #f0e0d0;padding:8px 12px;border-radius:6px;font-size:12px;cursor:pointer;margin-bottom:16px;">← カテゴリーをリセット</button>` : ''}
+                ${filtered.map(p => `
+                    <div class="prompt-card">
+                        <div class="prompt-title">${p.title}</div>
+                        <div class="prompt-category">${p.category}</div>
+                        <div class="section-header">説明</div>
+                        <div class="prompt-description">${p.prompt}</div>
+                        <div class="section-header">アレンジ例</div>
+                        <div class="prompt-text">${p.arrange}</div>
+                        <div class="section-header">修正フレーズ</div>
+                        <div class="prompt-text">${p.fix}</div>
+                        <div class="section-header">Canvaでの使用例</div>
+                        <div class="prompt-text">${p.canvaUse}</div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="copyText('${p.prompt.replace(/'/g, "\\'")}')">📋 コピー</button>
+                            <button class="btn btn-secondary" onclick="setPage('maker')">✏️ カスタマイズ</button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function renderMaker() {
+            if (showMakerResult) {
+                const promptJa = `${makerData.role.join('・')}で${makerData.place.join('・')}、${makerData.mood.join('・')}な雰囲気。${makerData.color.join('・')}を基調に${makerData.composition.join('・')}構図。${makerData.extra}`;
+                const promptAi = generatePrompt();
+
+                return `
+                    <div class="result-container">
+                        <div class="result-title">あなたのプロンプトができました!</div>
+                        <div class="result-section">
+                            <div class="result-label">日本語版</div>
+                            <div class="result-text">${promptJa}</div>
+                        </div>
+                        <div class="result-section">
+                            <div class="result-label">AI用プロンプト</div>
+                            <div class="result-text">${promptAi}</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyText('${promptAi.replace(/'/g, "\\'")}')">📋 プロンプトをコピー</button>
+                        <button class="btn btn-secondary" style="margin-top:12px;width:100%;" onclick="resetMaker()">別のプロンプトを作る</button>
+                    </div>
+                `;
+            }
+
+            const progressWidth = (makerStep / 8) * 100;
+            let stepContent = '';
+
+            if (makerStep === 1) {
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 1</div>
+                        <div class="step-title">何を作りたい?</div>
+                        <div class="options-grid">
+                            ${["人物", "カフェ・食べ物", "商品", "背景", "小物", "SNS用画像", "その他"].map(opt => `
+                                <button class="option-button ${makerData.type === opt ? 'selected' : ''}" onclick="setMakerData('type', '${opt}'); setMakerStep(2);">${opt}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (makerStep === 2) {
+                let roleOptions = [];
+                if (makerData.type === "人物") {
+                    roleOptions = ["20代女性", "30代女性", "40代女性", "男性", "子ども", "親子", "友達", "指定なし"];
+                } else if (makerData.type === "商品") {
+                    roleOptions = ["コスメ", "ハンドメイド", "アクセサリー", "デジタル商品", "食べ物", "カフェメニュー", "その他"];
+                } else {
+                    roleOptions = ["シンプル", "華やか", "ナチュラル", "モダン"];
+                }
+
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 2</div>
+                        <div class="step-title">主役は?</div>
+                        <div style="font-size:12px;color:#999;margin-bottom:10px;font-style:italic;">複数選択できます</div>
+                        <div class="options-grid">
+                            ${roleOptions.map(opt => `
+                                <button class="option-button ${makerData.role.includes(opt) ? 'selected' : ''}" onclick="toggleMakerField('role', '${opt}')">${opt}</button>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="setMakerStep(3)">次へ</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(1)">← 戻る</button>
+                    </div>
+                `;
+            } else if (makerStep === 3) {
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 3</div>
+                        <div class="step-title">場所・背景</div>
+                        <div style="font-size:12px;color:#999;margin-bottom:10px;font-style:italic;">複数選択できます</div>
+                        <div class="options-grid">
+                            ${["韓国カフェ", "ナチュラルカフェ", "自宅", "おしゃれなデスク", "ショップ", "屋外", "白背景", "淡色背景", "指定なし"].map(opt => `
+                                <button class="option-button ${makerData.place.includes(opt) ? 'selected' : ''}" onclick="toggleMakerField('place', '${opt}')">${opt}</button>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="setMakerStep(4)">次へ</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(2)">← 戻る</button>
+                    </div>
+                `;
+            } else if (makerStep === 4) {
+                const moodOptions = ["韓国ナチュラル", "韓国ガーリー", "淡色", "大人かわいい", "シンプル", "おしゃれ", "絵本のような", "やわらかい", "上品", "シック"];
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 4</div>
+                        <div class="step-title">雰囲気を選ぶ</div>
+                        <div style="font-size:12px;color:#999;margin-bottom:10px;font-style:italic;">複数選択できます</div>
+                        <div class="options-grid">
+                            ${moodOptions.map(opt => `
+                                <button class="option-button ${makerData.mood.includes(opt) ? 'selected' : ''}" onclick="toggleMood('${opt}')">${opt}</button>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="setMakerStep(5)">次へ</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(3)">← 戻る</button>
+                    </div>
+                `;
+            } else if (makerStep === 5) {
+                const colorOptions = ["アイボリー", "ベージュ", "淡いピンク", "ミルクブラウン", "セージ", "ブルー", "イエロー", "モノトーン"];
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 5</div>
+                        <div class="step-title">色を選ぶ</div>
+                        <div style="font-size:12px;color:#999;margin-bottom:10px;font-style:italic;">複数選択できます</div>
+                        <div class="options-grid">
+                            ${colorOptions.map(opt => `
+                                <button class="option-button ${makerData.color.includes(opt) ? 'selected' : ''}" onclick="toggleMakerField('color', '${opt}')">${opt}</button>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="setMakerStep(6)">次へ</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(4)">← 戻る</button>
+                    </div>
+                `;
+            } else if (makerStep === 6) {
+                const compositionOptions = ["正面", "引きの構図", "上から", "横から", "手元", "顔を写さない", "余白多め", "中央配置"];
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 6</div>
+                        <div class="step-title">構図を選ぶ</div>
+                        <div style="font-size:12px;color:#999;margin-bottom:10px;font-style:italic;">複数選択できます</div>
+                        <div class="options-grid">
+                            ${compositionOptions.map(opt => `
+                                <button class="option-button ${makerData.composition.includes(opt) ? 'selected' : ''}" onclick="toggleMakerField('composition', '${opt}')">${opt}</button>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="setMakerStep(7)">次へ</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(5)">← 戻る</button>
+                    </div>
+                `;
+            } else if (makerStep === 7) {
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 7</div>
+                        <div class="step-title">用途は?</div>
+                        <div style="font-size:12px;color:#999;margin-bottom:10px;font-style:italic;">複数選択できます</div>
+                        <div class="options-grid">
+                            ${["Instagram投稿", "Instagramリール表紙", "note", "ブログ", "Canva", "商品紹介", "ECショップ", "その他"].map(opt => `
+                                <button class="option-button ${makerData.use.includes(opt) ? 'selected' : ''}" onclick="toggleMakerField('use', '${opt}')">${opt}</button>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="setMakerStep(8)">次へ</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(6)">← 戻る</button>
+                    </div>
+                `;
+            } else if (makerStep === 8) {
+                stepContent = `
+                    <div class="step-container">
+                        <div class="step-label">STEP 8</div>
+                        <div class="step-title">追加したいものは?</div>
+                        <textarea class="text-input" id="extraInput" placeholder="例：ノートパソコンとカフェラテを置きたい&#10;例：黄色い花を入れたい&#10;例：文字を入れるため右側を空けたい" rows="4">${makerData.extra}</textarea>
+                        <button class="btn btn-primary" style="margin-top:12px;width:100%;" onclick="updateExtra(); showMakerResult = true; renderContent();">✨ プロンプトを完成させる</button>
+                        <button class="btn btn-secondary" style="margin-top:6px;width:100%;" onclick="setMakerStep(7)">← 戻る</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="margin-bottom:12px;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${progressWidth}%"></div>
+                    </div>
+                    <div style="font-size:12px;color:#999;text-align:right;">STEP ${makerStep} / 8</div>
+                </div>
+                ${stepContent}
+            `;
+        }
+
+        function renderPhrases() {
+            return Object.entries(fixPhrases).map(([category, phrases]) => `
+                <div class="phrase-section">
+                    <div class="phrase-category">${category}</div>
+                    ${phrases.map((phrase, idx) => `
+                        <div class="phrase-item">
+                            <div class="phrase-text">${phrase}</div>
+                            <div class="copy-icon" onclick="copyText('${phrase.replace(/'/g, "\\'")}')">📋</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function renderSizes() {
+            return canvaSizes.map((size, idx) => `
+                <div class="size-card">
+                    <div class="size-purpose">${size.purpose}</div>
+                    <div class="size-info">
+                        <div class="info-item"><strong>${size.size}</strong></div>
+                        <div class="info-item">${size.ratio}</div>
+                    </div>
+                    <div style="font-size:12px;color:#888;margin-bottom:8px;">${size.use}</div>
+                    <button class="btn btn-secondary" style="width:100%;" onclick="setPage('maker')">このサイズでプロンプトを作る →</button>
+                </div>
+            `).join('');
+        }
+
+        // ===== UTILITIES =====
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('コピーしました！');
+            });
+        }
+
+        function generatePrompt() {
+            const parts = [];
+            if (makerData.role.length > 0) parts.push(`${makerData.role.join('・')}が`);
+            if (makerData.place.length > 0) parts.push(`${makerData.place.join('・')}で`);
+            if (makerData.mood.length > 0) parts.push(`${makerData.mood.join('、')}な雰囲気で`);
+            if (makerData.color.length > 0) parts.push(`${makerData.color.join('・')}を基調に`);
+            if (makerData.composition.length > 0) parts.push(`${makerData.composition.join('・')}構図で`);
+            if (makerData.extra) parts.push(makerData.extra);
+            
+            let promptText = parts.join('、') || "おしゃれな画像";
+            promptText += "。縦長4:5、余白あり。";
+            if (makerData.use.includes("Instagram投稿")) promptText += " Instagram投稿用。";
+            
+            return promptText;
+        }
+
+        function setPage(page) {
+            currentPage = page;
+            if (page === 'maker') {
+                showMakerResult = false;
+                makerStep = 1;
+            }
+            renderNav();
+            renderContent();
+        }
+
+        function setCategory(cat) {
+            selectedCategory = cat;
+        }
+
+        function setMakerData(field, value) {
+            makerData[field] = value;
+        }
+
+        function setMakerStep(step) {
+            makerStep = step;
+            renderContent();
+        }
+
+        function toggleMood(mood) {
+            const idx = makerData.mood.indexOf(mood);
+            if (idx === -1) {
+                makerData.mood.push(mood);
+            } else {
+                makerData.mood.splice(idx, 1);
+            }
+            renderContent();
+        }
+
+        function toggleMakerField(field, value) {
+            const idx = makerData[field].indexOf(value);
+            if (idx === -1) {
+                makerData[field].push(value);
+            } else {
+                makerData[field].splice(idx, 1);
+            }
+            renderContent();
+        }
+
+        function updateExtra() {
+            makerData.extra = document.getElementById('extraInput').value;
+        }
+
+        function resetMaker() {
+            makerStep = 1;
+            makerData = { type: null, role: [], place: [], mood: [], color: [], composition: [], use: [], extra: '' };
+            showMakerResult = false;
+            renderContent();
+        }
+
+        // ===== SEARCH =====
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            if (currentPage === 'prompts') {
+                renderContent();
+            }
+        });
+
+        // ===== INIT =====
+        renderNav();
+        renderContent();
+    </script>
+</body>
+</html>
